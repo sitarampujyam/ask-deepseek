@@ -2,7 +2,7 @@
 
 > **Heads up:** a lot of vibe coding went into this extension. I shaped it around my own taste, mainly to fix the things I
 > found annoying about Chrome's built-in PDF viewer. I built it for personal use only, but other people might find it
-> useful too, so I put it on GitHub. Expect rough edges, and issues or pull requests are welcome.
+> useful too, so I put it on GitHub. Issues and pull requests are welcome.
 
 A Chrome extension that puts DeepSeek in your side panel and makes it easy to ask about whatever you're reading.
 

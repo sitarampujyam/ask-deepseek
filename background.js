@@ -162,9 +162,6 @@ async function handleAsk(msg, sender) {
     return { ok: true, queued: true };
   }
   if (popup) return deliverToPopup(popup, payload);
-  // Re-opening an already-open panel (inside the click's user gesture) asks Chrome to move keyboard focus into it,
-  // so the message box can be typed in at once. Harmless if Chrome ignores it.
-  if (typeof winId === 'number') chrome.sidePanel.open({ windowId: winId }).catch(() => {});
   panel.port.postMessage({ type: 'deliver', payload });
   return { ok: true };
 }

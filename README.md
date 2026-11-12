@@ -4,6 +4,8 @@
 > found annoying about Chrome's built-in PDF viewer. I built it for personal use only, but other people might find it
 > useful too, so I put it on GitHub. Issues and pull requests are welcome.
 
+![The reader, dark theme, showing the Transformer figure from "Attention Is All You Need"](docs/hero.png)
+
 A Chrome extension that puts DeepSeek in your side panel and makes it easy to ask about whatever you're reading.
 
 Select some text on any page, click the small **Ask DeepSeek** button that pops up, and the text lands in DeepSeek's
@@ -63,6 +65,10 @@ To update later, replace the folder with the new download and press the reload a
 - Page colours: Original, Dark, Sepia. Only the pages change.
 - Light, Dark or System theme for the reader itself.
 - Seven colour themes (Violet, Magenta, Rose, Amber, Emerald, Teal, Ocean), under the three-dots menu.
+
+![Light theme in Ocean, with the three-dots menu open](docs/light-ocean-menu.png)
+![Dark theme in Emerald, with the three-dots menu open](docs/dark-emerald-menu.png)
+
 - Present mode (fullscreen, arrow keys or space to turn pages).
 - Print, download, document properties, password-protected PDFs.
 - Opens big files quickly: loads the PDF in pieces, draws visible pages first.
@@ -70,6 +76,9 @@ To update later, replace the folder with the new download and press the reload a
 - Switch to Chrome's own viewer for the current file at any time.
 
 **Annotating** (pen button in the reader)
+
+![Highlights, a pen mark and a text note on a PDF page](docs/annotate.png)
+
 - Highlight text, or drag over empty space to highlight freehand.
 - Draw with a pen, set colour and thickness.
 - Type text boxes, set colour and size.

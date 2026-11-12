@@ -4,7 +4,7 @@
 > found annoying about Chrome's built-in PDF viewer. I built it for personal use only, but other people might find it
 > useful too, so I put it on GitHub. Issues and pull requests are welcome.
 
-![The reader, dark theme, showing the Transformer figure from "Attention Is All You Need"](docs/hero.png)
+![The reader, light theme, showing the Transformer figure from "Attention Is All You Need"](docs/hero.png)
 
 A Chrome extension that puts DeepSeek in your side panel and makes it easy to ask about whatever you're reading.
 

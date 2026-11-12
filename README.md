@@ -65,6 +65,10 @@ To update later, replace the folder with the new download and press the reload a
 - Thumbnail panel on the left that follows your scrolling.
 - Two-page view.
 - Page colours: Original, Dark, Sepia. Only the pages change.
+
+![Dark page colour: the pages are inverted, the figure keeps its colours](docs/page-dark.png)
+![Sepia page colour: warm paper tone, easy on the eyes](docs/page-sepia.png)
+
 - Light, Dark or System theme for the reader itself.
 - Seven colour themes (Violet, Magenta, Rose, Amber, Emerald, Teal, Ocean), under the three-dots menu.
 

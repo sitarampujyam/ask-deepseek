@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ask DeepSeek</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <div id="strip" class="strip" role="toolbar" aria-label="Ask DeepSeek tools">
+    <button id="btnSnap" class="chip" title="Add a snapshot of the current tab to DeepSeek">
+      <svg viewBox="0 0 24 24"><path d="M4 8.500a2 2 0 0 1 2-2h1.500l1.200-2h6.600l1.200 2H18a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><circle cx="12" cy="12.800" r="3.500"/></svg>Snapshot
+    </button>
+    <button id="btnSummarise" class="chip" title="Paste this page's text plus a snapshot and ask DeepSeek to summarise it">
+      <svg viewBox="0 0 24 24"><path d="M4 6.500h16M4 12h16M4 17.500h9"/><path d="M18.500 14.500l.9 2.100 2.100.9-2.100.9-.9 2.100-.9-2.100-2.100-.9 2.100-.9z" fill="currentColor" stroke="none"/></svg>Summarise
+    </button>
+    <span id="stripHint" class="hint"></span>
+  </div>
+  <iframe id="frame" title="DeepSeek chat" allow="clipboard-write; clipboard-read"></iframe>
+
+  <div id="notice" class="notice" hidden role="status">
+    <p id="noticeText"></p>
+    <div class="row" id="noticeButtons"></div>
+  </div>
+  <div id="toast" class="toast" hidden role="status"></div>
+
+  <script src="sidepanel.js"></script>
+</body>
+</html>

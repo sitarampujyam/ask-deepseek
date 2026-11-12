@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ask DeepSeek options</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; max-width: 560px; margin: 40px auto; padding: 0 20px; }
+    label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+    input { margin-top: 4px; width: 16px; height: 16px; }
+    small { display: block; opacity: .75; }
+    #saved { margin-top: 14px; opacity: 0; transition: opacity .2s; }
+    #saved.on { opacity: 1; }
+  </style>
+</head>
+<body>
+  <h1>Ask DeepSeek</h1>
+  <label>
+    <input type="checkbox" id="intercept">
+    <span>Open PDF links in the Ask DeepSeek reader
+      <small>When off, PDFs open in Chrome’s built-in viewer. The context-menu entry “Open in Ask DeepSeek reader” still works.</small>
+    </span>
+  </label>
+  <label style="margin-top:18px">
+    <input type="checkbox" id="remember">
+    <span>Remember where I stopped in each PDF
+      <small>Reopening a PDF returns to the same page, zoom and rotation. Stored only in this browser, never sent anywhere.</small>
+    </span>
+  </label>
+  <p><button id="forget">Forget all saved positions</button> <span id="forgot" style="opacity:.75"></span></p>
+  <div id="saved" role="status">Saved</div>
+  <script src="options.js"></script>
+</body>
+</html>

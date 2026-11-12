@@ -6,6 +6,8 @@
 
 ![The reader in the light theme with the Ocean colour, three-dots menu open](docs/light-ocean-menu.png)
 
+![Selecting text in the reader and sending it to DeepSeek in the side panel](docs/side-panel.png)
+
 A Chrome extension that puts DeepSeek in your side panel and makes it easy to ask about whatever you're reading.
 
 Select some text on any page, click the small **Ask DeepSeek** button that pops up, and the text lands in DeepSeek's

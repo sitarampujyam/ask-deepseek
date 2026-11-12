@@ -4,7 +4,7 @@
 > found annoying about Chrome's built-in PDF viewer. I built it for personal use only, but other people might find it
 > useful too, so I put it on GitHub. Issues and pull requests are welcome.
 
-![The reader, light theme, showing the Transformer figure from "Attention Is All You Need"](docs/hero.png)
+![The reader in the light theme with the Ocean colour, three-dots menu open](docs/light-ocean-menu.png)
 
 A Chrome extension that puts DeepSeek in your side panel and makes it easy to ask about whatever you're reading.
 
@@ -66,7 +66,7 @@ To update later, replace the folder with the new download and press the reload a
 - Light, Dark or System theme for the reader itself.
 - Seven colour themes (Violet, Magenta, Rose, Amber, Emerald, Teal, Ocean), under the three-dots menu.
 
-![Light theme in Ocean, with the three-dots menu open](docs/light-ocean-menu.png)
+![Dark theme in the default Violet, showing the Transformer figure from "Attention Is All You Need"](docs/hero-dark.png)
 ![Dark theme in Emerald, with the three-dots menu open](docs/dark-emerald-menu.png)
 
 - Present mode (fullscreen, arrow keys or space to turn pages).

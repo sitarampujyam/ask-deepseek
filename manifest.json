@@ -35,7 +35,8 @@
       ],
       "js": [
         "selectors.js",
-        "content.js"
+        "content.js",
+        "page-button.js"
       ],
       "all_frames": true,
       "run_at": "document_idle"

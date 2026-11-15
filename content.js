@@ -29,6 +29,11 @@
     'Write in simple, lucid language. No introduction or closing remarks, no filler or AI-sounding phrasing. ' +
     'Get straight to the point, be accurate, and explain it well.\n\n';
 
+  const RESPONSE_HEADER =
+    'The user selected the following text from your previous response and may ask questions about it. If the user says nothing else, just explain the selected text.\n' +
+    'Write in simple, lucid language. No introduction or closing remarks, no filler or AI-sounding phrasing. ' +
+    'Get straight to the point, be accurate, and explain it well.\n\n';
+
   function readValue(el) {
     return el instanceof HTMLTextAreaElement || el instanceof HTMLInputElement ? el.value : (el.innerText || '');
   }
@@ -61,7 +66,7 @@
     const empty = existing.trim() === '';
     const isPage = payload.kind === 'page';
     const block = isPage ? `Page: ${payload.title}\nURL: ${payload.url}\n"""\n${payload.text}\n"""\n\n` : buildBlock(payload);
-    const header = isPage ? PAGE_HEADER : HEADER;
+    const header = isPage ? PAGE_HEADER : payload.kind === 'response' ? RESPONSE_HEADER : HEADER;
     const isTextControl = el instanceof HTMLTextAreaElement || el instanceof HTMLInputElement;
 
     if (isTextControl) {
@@ -119,10 +124,13 @@
 
   let chain = Promise.resolve();                       // handle payloads one at a time, in arrival order
   const enqueue = (fn) => (chain = chain.then(fn, fn));
+  // Used by page-button.js when you select text inside DeepSeek's own replies (same frame, same extension).
+  globalThis.__askDeepSeekPrefill = (p) => enqueue(() => prefill(p));
 
   function validPayload(p) {
     if (p && p.kind === 'page') return typeof p.url === 'string' && /^(https?|file):/.test(p.url) && typeof p.title === 'string' && typeof p.text === 'string' && p.text.length > 0 && p.text.length <= 70000;
     if (p && p.kind === 'image') return typeof p.dataUrl === 'string' && p.dataUrl.startsWith('data:image/');
+    if (p && p.kind === 'response') return typeof p.text === 'string' && p.text.length > 0 && p.text.length <= 6000;
     return p && typeof p === 'object' && typeof p.text === 'string' && p.text.length > 0 &&
            typeof p.title === 'string' && p.text.length <= 6000;
   }

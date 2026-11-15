@@ -52,6 +52,7 @@ To update later, replace the folder with the new download and press the reload a
 - Fills DeepSeek's message box and puts the cursor at the end. Never presses send.
 - Adds a source line with the page title, the PDF page number and the link. A second selection is appended below the first.
 - Starts the box with a short instruction telling DeepSeek to explain the text plainly. Add your own question and it follows that instead.
+- Works inside DeepSeek too: select part of one of its replies and the same button appears. The text goes into the message box introduced as coming from the earlier response, so you can ask a follow-up about just that bit. Can be turned off in Options.
 - Snapshot of the visible part of a page or PDF, pasted as an image. Held in memory only, never saved to disk.
 - Summarise button for web pages: page text plus a screenshot.
 - Declines DeepSeek's cookie banner for you (necessary cookies only), since it can't remember the choice inside a panel.
@@ -118,6 +119,7 @@ Reading position and settings are stored in your browser. Options has a switch t
 Open the extension's options page (right-click the icon, then Options):
 - Open PDF links in the reader (on by default). Turn it off to use Chrome's viewer again.
 - Remember where I stopped in each PDF.
+- Show the Ask button when selecting text in DeepSeek's replies (on by default).
 - Forget all saved positions.
 
 ## If DeepSeek changes its website

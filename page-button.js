@@ -232,6 +232,7 @@ function createAskButton({ getSource, send }) {
   // In the PDF reader the button is always available and opens the side panel itself;
   // on ordinary pages it only exists while the side panel is already open.
   const IS_READER = location.protocol === 'chrome-extension:' && location.pathname.endsWith('/viewer.html');
+  const ON_DEEPSEEK = location.hostname === 'chat.deepseek.com';
   let btn = null;
   let panelOpen = false;
   let windowId = null;
@@ -257,6 +258,28 @@ function createAskButton({ getSource, send }) {
       });
     }
     if (btn) btn.setEnabled(enabled);
+  }
+
+  // Inside DeepSeek itself (the side panel frame or the popup): the button is for selecting text in DeepSeek's
+  // replies. It fills this same frame's message box directly, no background round trip. Controlled by an option.
+  if (ON_DEEPSEEK) {
+    let on = true;
+    const show = () => {
+      if (!btn) {
+        btn = createAskButton({
+          getSource: () => ({ title: 'your earlier response', url: '' }),
+          send: async (payload) => typeof globalThis.__askDeepSeekPrefill === 'function'
+            ? globalThis.__askDeepSeekPrefill({ kind: 'response', text: payload.text, title: payload.title })
+            : { ok: false }
+        });
+      }
+      btn.setEnabled(on);
+    };
+    chrome.storage.local.get({ askInDeepSeek: true }).then((v) => { on = v.askInDeepSeek !== false; show(); }).catch(show);
+    chrome.storage.onChanged.addListener((ch, area) => {
+      if (area === 'local' && ch.askInDeepSeek) { on = ch.askInDeepSeek.newValue !== false; show(); }
+    });
+    return;
   }
 
   // The panel-state push (and re-query) decides visibility on ordinary pages.

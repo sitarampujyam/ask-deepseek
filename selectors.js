@@ -47,19 +47,27 @@
            largestVisible('[contenteditable=""], [contenteditable="true"], [contenteditable="plaintext-only"]');
   }
 
-  // Cookie banner: we pick the privacy-friendly "Necessary cookies only" button.
-  // 1) DeepSeek's own class (seen on the live site), 2) fallback: the innermost element with exactly that text.
-  const COOKIE_DECLINE_CLASS = '.cookie_banner-accept-essential-button';
-  const COOKIE_DECLINE_TEXT = /^\s*necessary cookies only\s*$/i;
+  // Cookie banners: always pick the privacy-friendly choice (reject / necessary only).
+  // 1) known buttons on the live sites, 2) fallback: a button with a "reject"-style label inside something about cookies.
+  const COOKIE_REJECT_SELECTORS = [
+    '.cookie_banner-accept-essential-button',   // DeepSeek: "Necessary cookies only"
+    '[data-testid="consent-reject"]'            // Claude: "Reject"
+  ];
+  const COOKIE_REJECT_TEXT = /^\s*(necessary cookies only|use necessary cookies only|only necessary cookies|reject|reject all|reject all cookies|reject non-essential( cookies)?|decline|decline all|decline optional cookies)\s*$/i;
 
   function findCookieDecline() {
-    const byClass = document.querySelector(COOKIE_DECLINE_CLASS);
-    if (byClass) return byClass;
-    let inner = null;
-    for (const el of document.querySelectorAll('body *')) {
-      if (COOKIE_DECLINE_TEXT.test(el.textContent || '') && ![...el.children].some(c => COOKIE_DECLINE_TEXT.test(c.textContent || ''))) inner = el;
+    for (const sel of COOKIE_REJECT_SELECTORS) {
+      const el = document.querySelector(sel);
+      if (el && isVisible(el)) return el;
     }
-    return inner && (inner.closest('button, [role="button"]') || inner);
+    for (const el of document.querySelectorAll('button, [role="button"]')) {
+      if (!COOKIE_REJECT_TEXT.test(el.innerText || el.textContent || '') || !isVisible(el)) continue;
+      let p = el.parentElement;
+      for (let i = 0; i < 6 && p; i++, p = p.parentElement) {
+        if (/cookie/i.test(p.innerText || '')) return el;
+      }
+    }
+    return null;
   }
 
   globalThis.AskDeepSeekSelectors = { INPUT_SELECTORS, findInput, findCookieDecline };

@@ -214,21 +214,48 @@
   });
 
   /* ---------- cookie banner ---------- */
-  // DeepSeek can't keep its cookie choice when embedded, so it would ask every time. Answer it once per load
-  // with "Necessary cookies only" (user's request). Watches for up to 60 s, then stops.
+  // Chat sites can't keep their cookie choice when embedded, so they ask on every load. Answer once per load
+  // with the reject / necessary-only button (see selectors.js). Watches for up to 60 s, then stops.
 
   (function dismissCookieBanner() {
-    let done = false;
-    const tryClick = () => {
+    let done = false, pending = 0;
+    const check = () => {
+      pending = 0;
       if (done) return;
       const b = findCookieDecline();
       if (b) { done = true; b.click(); obs.disconnect(); }
     };
+    const tryClick = () => { if (!pending && !done) pending = setTimeout(check, 250); };   // at most 4 checks a second
     const obs = new MutationObserver(tryClick);
     obs.observe(document.documentElement, { childList: true, subtree: true });
     tryClick();
     setTimeout(() => obs.disconnect(), 60000);
   })();
+
+  /* ---------- page colour for the side panel ---------- */
+  // The panel paints its background in the chat's own colour, so the glass bar looks like it sits on the chat.
+  function pageBg() {
+    const solid = (el) => {
+      for (; el; el = el.parentElement) {
+        const c = getComputedStyle(el).backgroundColor;
+        if (c && c !== 'transparent' && !/rgba\(.*,\s*0\)$/.test(c)) return c;
+      }
+      return null;
+    };
+    return solid(document.elementFromPoint(Math.round(innerWidth / 2), 2)) || solid(document.body) || null;
+  }
+  if (!isTop) {
+    let last = '';
+    const report = () => {
+      const bg = pageBg();
+      if (bg && bg !== last) { last = bg; window.parent.postMessage({ type: 'ask-deepseek-bg', bg }, EXT_ORIGIN); }
+    };
+    const watch = new MutationObserver(() => setTimeout(report, 50));
+    watch.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'style', 'data-theme', 'data-mode'] });
+    matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => setTimeout(report, 100));
+    let n = 0; const early = setInterval(() => { report(); if (++n >= 15) clearInterval(early); }, 1000);   // sites settle after hydrating
+    report();
+  }
 
   /* ---------- ready signal ---------- */
 

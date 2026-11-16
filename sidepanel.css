@@ -39,19 +39,10 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: var(--desk);
   font: 14px/1.45 system-ui, -apple-system, "SF Pro Text", "Segoe UI", Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
 body { display: flex; flex-direction: column; }
 
-/* ambient glow behind the bar, same recipe as the reader's desk */
-.top { position: relative; z-index: 5; flex: none; padding: 8px 8px 7px;
-  background:
-    radial-gradient(120% 160% at 0% 0%, hsl(calc(231deg + var(--hs)) 100% 67% / .26), transparent 60%),
-    radial-gradient(120% 160% at 100% 100%, hsl(calc(270deg + var(--hs)) 100% 68% / .20), transparent 62%),
-    radial-gradient(80% 120% at 85% 0%, hsl(calc(175deg + var(--hs)) 54% 51% / .12), transparent 60%),
-    var(--desk); }
-.light .top { background:
-    radial-gradient(120% 160% at 0% 0%, hsl(calc(249deg + var(--hs)) 100% 75% / .42), transparent 60%),
-    radial-gradient(120% 160% at 100% 100%, hsl(calc(276deg + var(--hs)) 100% 77% / .34), transparent 62%),
-    radial-gradient(80% 120% at 85% 0%, hsl(calc(210deg + var(--hs)) 100% 74% / .26), transparent 60%),
-    var(--desk); }
-#frame { display: block; width: 100%; flex: 1 1 auto; min-height: 0; border: 0; background: #fff; }
+/* the bar floats on the chat's own background colour (reported by the chat page); no glow */
+.top { position: relative; z-index: 5; flex: none; padding: 8px 8px 6px; background: transparent; }
+body { background: var(--chat-bg, var(--desk)); transition: background-color .25s; }
+#frame { display: block; width: 100%; flex: 1 1 auto; min-height: 0; border: 0; background: var(--chat-bg, #fff); }
 
 /* ---------- glass ---------- */
 .glass { position: relative; isolation: isolate; background: var(--glass-fill);
@@ -91,9 +82,6 @@ button { font: inherit; color: inherit; }
 .mi .ck { width: 16px; height: 16px; fill: none; stroke: var(--accent); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; visibility: hidden; }
 .mi[aria-checked="true"] .ck { visibility: visible; }
 .mi small { margin-left: auto; font-weight: 500; font-size: 12px; color: var(--fg-dim); }
-
-.hint { font-size: 11.5px; color: var(--fg-dim); padding: 5px 14px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.hint:empty { display: none; }
 
 /* notice + toast */
 .notice { position: fixed; left: 10px; right: 10px; bottom: 10px; padding: 14px; border-radius: 20px; z-index: 20; }

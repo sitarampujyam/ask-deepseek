@@ -79,6 +79,7 @@ function armReadyTimer() {
 
 function loadFrame() {
   ready = false;
+  chatBg = null; applyLook();
   frame.src = provider.url;
   frame.title = provider.name + ' chat';
   armReadyTimer();
@@ -139,9 +140,18 @@ btnReload.addEventListener('click', () => { hideNotice(); loadFrame(); });
 const HUE_SHIFT = { violet: 0, magenta: 50, rose: 90, amber: 150, emerald: -105, teal: -75, ocean: -40 };
 const systemDark = matchMedia('(prefers-color-scheme: dark)');
 function readPref(k, d) { try { const v = localStorage.getItem('askds.' + k); return v === null ? d : JSON.parse(v); } catch { return d; } }
+let chatBg = null;   // the chat page's own background colour, once it reports it
+function luminance(css) {
+  const m = /rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)/.exec(css || '');
+  return m ? (0.2126 * m[1] + 0.7152 * m[2] + 0.0722 * m[3]) / 255 : null;
+}
 function applyLook() {
   const t = readPref('theme', 'system');
-  const light = t === 'light' || (t === 'system' && !systemDark.matches);
+  const lum = luminance(chatBg);
+  // The bar sits on the chat, so it matches the chat's light/dark; before the chat reports, follow the reader's theme.
+  const light = lum !== null ? lum > 0.5 : (t === 'light' || (t === 'system' && !systemDark.matches));
+  document.documentElement.style.setProperty('--chat-bg', chatBg || '');
+  if (!chatBg) document.documentElement.style.removeProperty('--chat-bg');
   document.documentElement.classList.toggle('light', light);
   document.documentElement.style.setProperty('--hs', (HUE_SHIFT[readPref('hue', 'violet')] || 0) + 'deg');
 }
@@ -158,6 +168,10 @@ window.addEventListener('message', (event) => {
   if (event.origin !== provider.origin || event.source !== frame.contentWindow) return;
   const d = event.data;
   if (!d || typeof d.type !== 'string') return;
+  if (d.type === 'ask-deepseek-bg') {
+    if (typeof d.bg === 'string' && /^rgba?\([\d.,\s]+\)$/.test(d.bg)) { chatBg = d.bg; applyLook(); }
+    return;
+  }
   if (d.type === 'ask-deepseek-ready') {
     ready = true;
     clearTimeout(readyTimer);
@@ -203,7 +217,6 @@ function deliver(payload) {
 
 const btnSnap = document.getElementById('btnSnap');
 const btnSummarise = document.getElementById('btnSummarise');
-const stripHint = document.getElementById('stripHint');
 const READER_URL = chrome.runtime.getURL('viewer.html');
 
 async function activeTab() {
@@ -215,7 +228,9 @@ async function refreshStrip() {
   const t = await activeTab();
   const reader = !!(t && t.url && t.url.startsWith(READER_URL));   // PDFs have their own camera button
   btnSnap.disabled = btnSummarise.disabled = reader;
-  stripHint.textContent = reader ? 'PDF reader has its own tools' : '';
+  const why = reader ? ' (the PDF reader has its own camera button)' : '';
+  btnSnap.title = 'Add a snapshot of the current tab to ' + pname() + why;
+  btnSummarise.title = "Paste this page's text plus a snapshot and ask " + pname() + ' to summarise it' + why;
 }
 chrome.tabs.onActivated.addListener(refreshStrip);
 chrome.tabs.onUpdated.addListener((id, change) => { if (change.url || change.status === 'complete') refreshStrip(); });

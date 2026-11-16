@@ -77,10 +77,10 @@ To update later, replace the folder with the new download and press the reload a
   attach button, drag and drop), so it tries those in turn and stops at the first one that works. If a site still refuses,
   the image goes on your clipboard and the panel tells you to press ⌘V. It's held in memory only, never saved to disk.
 - Summarise button for web pages: page text plus a screenshot.
-- Declines DeepSeek's cookie banner for you (necessary cookies only), since it can't remember the choice inside a panel.
+- Rejects cookie banners for you (DeepSeek: "Necessary cookies only", Claude: "Reject"), since the sites can't remember the choice inside a panel and would ask every time.
 - If a chat refuses to load inside the side panel, the panel offers a docked popup window and everything works there.
 - Right-click a link or page, **Open in Ask LLM reader**, for PDFs that don't end in `.pdf`.
-- The panel's top bar is liquid glass and follows the reader's theme (Light, Dark, System) and colour.
+- The panel's top bar is a floating liquid-glass pill, nothing else. It sits on the chat's own background colour and turns light or dark to match the chat.
 
 **PDF reader**
 - Continuous scrolling, page counter, jump to page by typing a number.

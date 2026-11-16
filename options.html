@@ -4,38 +4,60 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Ask LLM options</title>
-  <style>
-    :root { color-scheme: light dark; }
-    body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; max-width: 560px; margin: 40px auto; padding: 0 20px; }
-    label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
-    input { margin-top: 4px; width: 16px; height: 16px; }
-    small { display: block; opacity: .75; }
-    #saved { margin-top: 14px; opacity: 0; transition: opacity .2s; }
-    #saved.on { opacity: 1; }
-  </style>
+  <script src="theme-init.js"></script>
+  <link rel="stylesheet" href="options.css">
 </head>
 <body>
-  <h1>Ask LLM</h1>
-  <label>
-    <input type="checkbox" id="intercept">
-    <span>Open PDF links in the Ask LLM reader
-      <small>When off, PDFs open in Chrome’s built-in viewer. The context-menu entry “Open in Ask LLM reader” still works.</small>
-    </span>
-  </label>
-  <label style="margin-top:18px">
-    <input type="checkbox" id="remember">
-    <span>Remember where I stopped in each PDF
-      <small>Reopening a PDF returns to the same page, zoom and rotation. Stored only in this browser, never sent anywhere.</small>
-    </span>
-  </label>
-  <label style="margin-top:18px">
-    <input type="checkbox" id="indeepseek">
-    <span>Show the Ask button when I select text in the chat's replies
-      <small>Works in DeepSeek, Claude, ChatGPT and Gemini. Lets you ask a follow-up about part of an answer. The text goes into the same message box, introduced as coming from the earlier response.</small>
-    </span>
-  </label>
-  <p><button id="forget">Forget all saved positions</button> <span id="forgot" style="opacity:.75"></span></p>
-  <div id="saved" role="status">Saved</div>
+  <div id="ambient" aria-hidden="true"></div>
+  <main>
+    <header class="head">
+      <img src="icons/icon128.png" alt="" width="52" height="52">
+      <div>
+        <h1>Ask LLM</h1>
+        <p class="sub">Settings are saved as you change them.</p>
+      </div>
+    </header>
+
+    <section class="card glass" aria-labelledby="hReader">
+      <h2 id="hReader">PDF reader</h2>
+      <label class="row">
+        <span class="txt">
+          <span class="ttl">Open PDF links in the reader</span>
+          <span class="desc">When off, PDFs open in Chrome's built-in viewer. Right-click a link, "Open in Ask LLM reader", still works.</span>
+        </span>
+        <input type="checkbox" role="switch" id="intercept">
+      </label>
+      <div class="sep"></div>
+      <label class="row">
+        <span class="txt">
+          <span class="ttl">Remember where I stopped</span>
+          <span class="desc">Reopening a PDF returns to the same page, zoom and rotation. Stored only in this browser.</span>
+        </span>
+        <input type="checkbox" role="switch" id="remember">
+      </label>
+      <div class="row action">
+        <span class="txt">
+          <span class="ttl">Saved positions</span>
+          <span class="desc" id="forgot">Clear every remembered page and zoom.</span>
+        </span>
+        <button id="forget" class="pill">Forget all</button>
+      </div>
+    </section>
+
+    <section class="card glass" aria-labelledby="hAsk">
+      <h2 id="hAsk">Asking</h2>
+      <label class="row">
+        <span class="txt">
+          <span class="ttl">Ask button inside DeepSeek replies</span>
+          <span class="desc">Select part of an answer to ask a follow-up about just that bit. Claude, ChatGPT and Gemini have their own button for this.</span>
+        </span>
+        <input type="checkbox" role="switch" id="indeepseek">
+      </label>
+    </section>
+
+    <p class="foot">Nothing is sent anywhere until you press send in the chat. No analytics, no tracking.</p>
+  </main>
+  <div id="saved" class="glass" role="status">Saved</div>
   <script src="options.js"></script>
 </body>
 </html>

@@ -21,5 +21,6 @@ inDs.addEventListener('change', async () => {
 });
 document.getElementById('forget').addEventListener('click', () => {
   try { localStorage.removeItem('askds.pos'); } catch {}
-  document.getElementById('forgot').textContent = 'Done.';
+  document.getElementById('forgot').textContent = 'Done. All saved positions are cleared.';
 });
+requestAnimationFrame(() => requestAnimationFrame(() => document.documentElement.classList.remove('preload')));

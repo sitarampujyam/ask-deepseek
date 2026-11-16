@@ -240,6 +240,8 @@ function createAskButton({ getSource, send }) {
     const p = ASK_PROVIDERS[id];
     if (p) { ASK_NAME = p.name; if (btn) btn.refreshLabel(); }
   };
+  // Claude, ChatGPT and Gemini have their own button for selected reply text, so ours only runs inside DeepSeek.
+  if (HOST_PROVIDER && !HOST_PROVIDER.replyButton) return;
   if (HOST_PROVIDER) ASK_NAME = HOST_PROVIDER.name;
   else {
     chrome.storage.local.get({ provider: ASK_DEFAULT_PROVIDER }).then(v => setName(v.provider)).catch(() => {});

@@ -1,4 +1,4 @@
-// Side panel: hosts the chat iframe (DeepSeek or Claude), reports "I'm open" to the background via a port,
+// Side panel: hosts the chat iframe (DeepSeek, Claude, ChatGPT or Gemini), reports "I'm open" to the background via a port,
 // and relays selections into the iframe (or shows the popup fallback).
 
 let provider = ASK_PROVIDERS[ASK_DEFAULT_PROVIDER];   // which chat site is showing; remembered in storage
@@ -84,29 +84,74 @@ function loadFrame() {
   armReadyTimer();
 }
 
-/* ---------- DeepSeek / Claude switch ---------- */
+/* ---------- which chat: DeepSeek / Claude / ChatGPT / Gemini ---------- */
 
-const pseg = document.getElementById('providerSeg');
+const pickBtn = document.getElementById('pickBtn');
+const pickName = document.getElementById('pickName');
+const pickMenu = document.getElementById('pickMenu');
+const CHECK = '<svg class="ck" viewBox="0 0 24 24"><path d="M5 12.500l4.500 4.500L19 7.500"/></svg>';
+for (const p of Object.values(ASK_PROVIDERS)) {
+  const b = document.createElement('button');
+  b.className = 'mi'; b.setAttribute('role', 'menuitemradio'); b.dataset.p = p.id;
+  b.innerHTML = CHECK + '<span></span>' + (p.id === ASK_DEFAULT_PROVIDER ? '<small>default</small>' : '');
+  b.querySelector('span').textContent = p.name;
+  pickMenu.appendChild(b);
+}
 function paintProvider() {
-  pseg.querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.p === provider.id)));
+  pickName.textContent = provider.name;
+  pickMenu.querySelectorAll('.mi').forEach(b => b.setAttribute('aria-checked', String(b.dataset.p === provider.id)));
   btnSnap.title = 'Add a snapshot of the current tab to ' + pname();
   btnSummarise.title = "Paste this page's text plus a snapshot and ask " + pname() + ' to summarise it';
+  btnReload.title = 'Reload ' + pname() + ' (fixes a stuck sign-in or bot check)';
 }
-pseg.addEventListener('click', (e) => {
-  const b = e.target.closest('button');
-  if (!b || b.dataset.p === provider.id) return;
-  provider = ASK_PROVIDERS[b.dataset.p];
+function setMenu(open) {
+  pickMenu.hidden = !open; pickBtn.setAttribute('aria-expanded', String(open));
+  if (open) menuOpenedAt = Date.now();
+  if (open) (pickMenu.querySelector('[aria-checked="true"]') || pickMenu.querySelector('.mi')).focus({ preventScroll: true });
+}
+function chooseProvider(id) {
+  setMenu(false);
+  if (!ASK_PROVIDERS[id] || id === provider.id) return;
+  provider = ASK_PROVIDERS[id];
   chrome.storage.local.set({ provider: provider.id });
   hideNotice();
   paintProvider();
   loadFrame();
+}
+pickBtn.addEventListener('click', () => setMenu(pickMenu.hidden));
+pickMenu.addEventListener('click', (e) => { const b = e.target.closest('.mi'); if (b) chooseProvider(b.dataset.p); });
+pickMenu.addEventListener('keydown', (e) => {
+  const items = [...pickMenu.querySelectorAll('.mi')], i = items.indexOf(document.activeElement);
+  if (e.key === 'ArrowDown') { e.preventDefault(); items[(i + 1) % items.length].focus(); }
+  else if (e.key === 'ArrowUp') { e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
+  else if (e.key === 'Escape') { setMenu(false); pickBtn.focus(); }
 });
-pseg.addEventListener('keydown', (e) => {
-  if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
-  e.preventDefault();
-  const ids = Object.keys(ASK_PROVIDERS), n = ids.indexOf(provider.id) + (e.key === 'ArrowRight' ? 1 : -1);
-  const next = pseg.querySelector(`[data-p="${ids[(n + ids.length) % ids.length]}"]`);
-  next.click(); next.focus();
+document.addEventListener('pointerdown', (e) => { if (!pickMenu.hidden && !pickMenu.contains(e.target) && !pickBtn.contains(e.target)) setMenu(false); });
+let menuOpenedAt = 0;
+// Clicking into the chat frame closes the menu (ignore the first moment: a loading chat may grab focus).
+window.addEventListener('blur', () => { if (Date.now() - menuOpenedAt > 600) setMenu(false); });
+
+const btnReload = document.getElementById('btnReload');
+btnReload.addEventListener('click', () => { hideNotice(); loadFrame(); });
+
+/* ---------- look: follow the reader's theme and colour; sheen follows the pointer ---------- */
+
+const HUE_SHIFT = { violet: 0, magenta: 50, rose: 90, amber: 150, emerald: -105, teal: -75, ocean: -40 };
+const systemDark = matchMedia('(prefers-color-scheme: dark)');
+function readPref(k, d) { try { const v = localStorage.getItem('askds.' + k); return v === null ? d : JSON.parse(v); } catch { return d; } }
+function applyLook() {
+  const t = readPref('theme', 'system');
+  const light = t === 'light' || (t === 'system' && !systemDark.matches);
+  document.documentElement.classList.toggle('light', light);
+  document.documentElement.style.setProperty('--hs', (HUE_SHIFT[readPref('hue', 'violet')] || 0) + 'deg');
+}
+window.addEventListener('storage', (e) => { if (e.key === 'askds.theme' || e.key === 'askds.hue') applyLook(); });   // changed in the reader
+systemDark.addEventListener('change', applyLook);
+applyLook();
+requestAnimationFrame(() => requestAnimationFrame(() => document.documentElement.classList.remove('preload')));
+document.querySelectorAll('.glass').forEach((g) => {
+  g.addEventListener('pointermove', (e) => { const r = g.getBoundingClientRect(); g.style.setProperty('--mx', (e.clientX - r.left) + 'px'); g.style.setProperty('--my', (e.clientY - r.top) + 'px'); });
+  g.addEventListener('pointerleave', () => { g.style.removeProperty('--mx'); g.style.removeProperty('--my'); });
 });
 
 window.addEventListener('message', (event) => {
@@ -120,6 +165,10 @@ window.addEventListener('message', (event) => {
     flush();
   } else if (d.type === 'ask-deepseek-result' && d.ok !== false) {
     try { window.focus(); frame.focus(); } catch {}
+  } else if (d.type === 'ask-deepseek-result' && d.ok === false && d.reason === 'image-not-accepted') {
+    copyLastImage().then((ok) => showToast(ok
+      ? pname() + " didn't take the snapshot directly. It's on your clipboard: click the message box and press " + (navigator.platform.startsWith('Mac') ? '⌘V' : 'Ctrl+V') + '.'
+      : pname() + " didn't accept the snapshot. Try pasting a screenshot yourself."));
   } else if (d.type === 'ask-deepseek-result' && d.ok === false) {
     showToast(d.reason === 'input-not-found'
       ? "Couldn't find " + pname() + "'s message box (signed in? see selectors.js)."
@@ -127,7 +176,19 @@ window.addEventListener('message', (event) => {
   }
 });
 
+// Fallback only when a site refuses the snapshot: put it on the clipboard so one paste finishes the job.
+let lastImage = null;
+async function copyLastImage() {
+  if (!lastImage) return false;
+  try {
+    const blob = await (await fetch(lastImage)).blob();
+    await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
+    return true;
+  } catch { return false; }
+}
+
 function post(payload) {
+  if (payload.kind === 'image') lastImage = payload.dataUrl;
   try { window.focus(); frame.focus(); } catch {}   // hand keyboard focus to the chat frame so you can type at once
   frame.contentWindow.postMessage({ type: 'ask-deepseek-prefill', payload }, provider.origin);
 }

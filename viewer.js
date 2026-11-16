@@ -106,8 +106,8 @@ async function load() {
   fileName = filenameFromUrl(originalUrl);
   sourceTitle = fileName.replace(/\.pdf$/i, '');
   $('title').textContent = fileName; $('title').title = fileName;
-  document.title = fileName + ' | Ask DeepSeek reader';
-  if (!fileUrl) return showMessage('No PDF given.<br>Open a PDF link, or right-click a link → <b>Open in Ask DeepSeek reader</b>.');
+  document.title = fileName + ' | Ask LLM reader';
+  if (!fileUrl) return showMessage('No PDF given.<br>Open a PDF link, or right-click a link → <b>Open in Ask LLM reader</b>.');
   const startPage = (/#.*?page=(\d+)/i.exec(fileUrl) || [])[1] | 0 || 1;
 
   setProgress(0);
@@ -821,7 +821,7 @@ window.addEventListener('resize', () => {
   resizeT = setTimeout(() => { if (pages.length) applyLayout({ keepScale: zoomMode === 'custom' }); }, 120);
 });
 
-/* ---------- Ask DeepSeek: source info for the floating button ---------- */
+/* ---------- Ask LLM: source info for the floating button ---------- */
 function pageOf(node) {
   const el = node && (node.nodeType === 1 ? node : node.parentElement);
   const pg = el && el.closest && el.closest('.pdf-page');

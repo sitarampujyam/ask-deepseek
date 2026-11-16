@@ -1,4 +1,4 @@
-// Ask DeepSeek: service worker.
+// Ask LLM: service worker.
 // Responsibilities: side-panel behaviour, header-stripping rule, PDF interception,
 // context menu, open/closed tracking of the side panel, routing selections.
 
@@ -47,7 +47,7 @@ installRules().catch(console.error);
 
 function installMenu() {
   chrome.contextMenus.removeAll(() => {
-    chrome.contextMenus.create({ id: 'open-in-reader', title: 'Open in Ask DeepSeek reader', contexts: ['link', 'page'] });
+    chrome.contextMenus.create({ id: 'open-in-reader', title: 'Open in Ask LLM reader', contexts: ['link', 'page'] });
   });
 }
 chrome.runtime.onInstalled.addListener(() => { installRules().catch(console.error); installMenu(); });

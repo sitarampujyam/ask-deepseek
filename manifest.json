@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Ask DeepSeek",
+  "name": "Ask LLM",
   "version": "1.0.0",
-  "description": "Read PDFs in a glass reader and highlight text on any page to drop it into the DeepSeek chat in the side panel. Nothing is sent automatically.",
+  "description": "Ask DeepSeek, Claude, ChatGPT or Gemini about anything you read: highlight text or snapshot a page into the chat in the side panel, plus a PDF reader with highlights and notes. Nothing is sent automatically.",
   "minimum_chrome_version": "114",
   "permissions": [
     "sidePanel",
@@ -19,7 +19,7 @@
     "service_worker": "background.js"
   },
   "action": {
-    "default_title": "Ask DeepSeek",
+    "default_title": "Ask LLM",
     "default_icon": {
       "16": "icons/icon16.png",
       "32": "icons/icon32.png"
@@ -32,7 +32,9 @@
     {
       "matches": [
         "https://chat.deepseek.com/*",
-        "https://claude.ai/*"
+        "https://claude.ai/*",
+        "https://chatgpt.com/*",
+        "https://gemini.google.com/*"
       ],
       "js": [
         "providers.js",
@@ -51,7 +53,9 @@
       ],
       "exclude_matches": [
         "https://chat.deepseek.com/*",
-        "https://claude.ai/*"
+        "https://claude.ai/*",
+        "https://chatgpt.com/*",
+        "https://gemini.google.com/*"
       ],
       "js": [
         "providers.js",
@@ -77,7 +81,7 @@
         "default": "Alt+Shift+D",
         "mac": "Alt+D"
       },
-      "description": "Open or close the DeepSeek side panel"
+      "description": "Open or close the chat side panel"
     }
   }
 }

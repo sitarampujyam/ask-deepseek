@@ -1,4 +1,4 @@
-// ALL chat-site DOM knowledge (DeepSeek and Claude) lives in this file. If the site changes and prefill
+// ALL chat-site DOM knowledge (DeepSeek, Claude, ChatGPT, Gemini) lives in this file. If the site changes and prefill
 // stops working, edit INPUT_SELECTORS below (usually a one-line fix).
 // Loaded before content.js as a content script (shared isolated-world globals).
 
@@ -7,7 +7,11 @@
   const INPUT_SELECTORS = [
     'textarea#chat-input',
     'div.ProseMirror[contenteditable="true"]',                  // Claude
-    'div[contenteditable="true"][aria-label*="prompt" i]',     // Claude
+    'div[contenteditable="true"][aria-label*="prompt" i]',     // Claude, Gemini ("Enter a prompt for Gemini")
+    '#prompt-textarea',                                         // ChatGPT (signed in)
+    'textarea[name="prompt"]',                                  // ChatGPT (signed out / narrow layout)
+    'textarea[placeholder*="ChatGPT" i]',
+    'rich-textarea div.ql-editor[contenteditable="true"]',      // Gemini
     'textarea[placeholder*="DeepSeek" i]',
     'textarea[placeholder*="message" i]',
     'div[contenteditable="true"][role="textbox"]'

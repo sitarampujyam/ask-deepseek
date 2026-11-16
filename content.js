@@ -1,4 +1,4 @@
-// Runs on https://chat.deepseek.com/* (all frames). Fills the message box; NEVER sends.
+// Runs on the chat sites in providers.js (all frames). Fills the message box; NEVER sends.
 // Two delivery paths:
 //  - iframe in the side panel: parent posts a message (origin-checked)
 //  - popup window top frame:   chrome.runtime onMessage from the background
@@ -34,9 +34,10 @@
     'Write in simple, lucid language. No introduction or closing remarks, no filler or AI-sounding phrasing. ' +
     'Get straight to the point, be accurate, and explain it well.\n\n';
 
-  // Claude gets a short intro with no style instructions; DeepSeek keeps the longer one above.
-  const ON_CLAUDE = location.hostname === 'claude.ai';
-  const CLAUDE_HEADERS = {
+  // Sites marked shortIntro in providers.js (Claude) get a short intro with no style instructions.
+  const SITE = Object.values(globalThis.ASK_PROVIDERS || {}).find(p => new URL(p.origin).hostname === location.hostname) || {};
+  const SHORT_INTRO = !!SITE.shortIntro;
+  const SHORT_HEADERS = {
     selection: 'The user selected the following text. If the user asks a question, answer it. If not, explain the selected text.\n\n',
     response: 'The user selected the following text from your previous response. If the user asks a question, answer it. If not, explain the selected text.\n\n',
     page: 'The user wants a summary of the web page below. The page text was copied from the page and a screenshot of it follows. If the user adds a question, answer it instead of summarising.\n\n'
@@ -75,7 +76,7 @@
     const isPage = payload.kind === 'page';
     const block = isPage ? `Page: ${payload.title}\nURL: ${payload.url}\n"""\n${payload.text}\n"""\n\n` : buildBlock(payload);
     const kind = isPage ? 'page' : payload.kind === 'response' ? 'response' : 'selection';
-    const header = ON_CLAUDE ? CLAUDE_HEADERS[kind] : { page: PAGE_HEADER, response: RESPONSE_HEADER, selection: HEADER }[kind];
+    const header = SHORT_INTRO ? SHORT_HEADERS[kind] : { page: PAGE_HEADER, response: RESPONSE_HEADER, selection: HEADER }[kind];
     const isTextControl = el instanceof HTMLTextAreaElement || el instanceof HTMLInputElement;
 
     if (isTextControl) {
@@ -98,17 +99,68 @@
     placeCaretAtEnd(el);
   }
 
-  // Image: simulate pasting a file into the message box (never presses send).
-  function attachImage(el, payload) {
+  // Image: hand the snapshot to the site the way a person would (paste, the attach button's file input,
+  // or drag-and-drop). Sites differ, so try them in the order set in providers.js and stop at the first
+  // one that makes an attachment appear. Never presses send.
+  function snapshotFile(payload) {
     const bin = atob(payload.dataUrl.split(',')[1]);
     const bytes = new Uint8Array(bin.length);
     for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
     const type = /^data:(image\/\w+);/.exec(payload.dataUrl)[1];
-    const file = new File([bytes], 'snapshot.' + (type === 'image/jpeg' ? 'jpg' : 'png'), { type });
-    const dt = new DataTransfer();
-    dt.items.add(file);
-    el.focus();
-    el.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true }));
+    return new File([bytes], 'snapshot.' + (type === 'image/jpeg' ? 'jpg' : 'png'), { type });
+  }
+  const withFile = (file) => { const dt = new DataTransfer(); dt.items.add(file); return dt; };
+  const ATTACH = {
+    paste(el, file) {
+      el.focus();
+      return !el.dispatchEvent(new ClipboardEvent('paste', { clipboardData: withFile(file), bubbles: true, cancelable: true }));
+    },
+    drop(el, file) {
+      const target = el.closest('form, fieldset') || el;
+      const dt = withFile(file);
+      for (const t of ['dragenter', 'dragover']) target.dispatchEvent(new DragEvent(t, { dataTransfer: dt, bubbles: true, cancelable: true }));
+      return !target.dispatchEvent(new DragEvent('drop', { dataTransfer: dt, bubbles: true, cancelable: true }));
+    },
+    input(el, file) {
+      const inputs = [...document.querySelectorAll('input[type="file"]')].filter(i => !i.disabled && (!i.accept || /image|\*/.test(i.accept)));
+      const near = inputs.find(i => (el.closest('form, fieldset') || document.body).contains(i)) || inputs[0];
+      if (!near) return false;
+      near.files = withFile(file).files;
+      near.dispatchEvent(new Event('input', { bubbles: true }));
+      near.dispatchEvent(new Event('change', { bubbles: true }));
+      return true;
+    }
+  };
+  // Something that looks like a new attachment: an image preview, or a file chip.
+  const ATTACHMENT_SEL = 'img[src^="blob:"], img[src^="data:"], [data-testid*="file" i], [data-testid*="attachment" i], [class*="attachment" i], [class*="file-preview" i], [class*="thumbnail" i], uploader-file-preview';
+  // Composer area: the form around the box, or a few levels up. Previews appear in here.
+  function composerOf(el) {
+    let c = el.closest('form, fieldset');
+    if (c) return c;
+    c = el;
+    for (let i = 0; i < 6 && c.parentElement && c.parentElement !== document.body; i++) c = c.parentElement;
+    return c;
+  }
+  let composer = null;
+  const countAttachments = () => document.querySelectorAll(ATTACHMENT_SEL).length +
+    (composer ? composer.querySelectorAll('img, [style*="background-image"], button').length : 0);
+  const nextFrameWait = (ms) => new Promise(r => setTimeout(r, ms));
+
+  async function attachImage(el, payload) {
+    const file = snapshotFile(payload);
+    composer = composerOf(el);
+    const order = SITE.imageVia || ['paste', 'drop', 'input'];
+    for (const how of order) {
+      const before = countAttachments();
+      let handled = false;
+      try { handled = ATTACH[how](el, file); } catch { handled = false; }
+      if (!handled) continue;
+      for (let t = 0; t < 12; t++) {                 // up to ~1.8 s for the preview to show up
+        await nextFrameWait(150);
+        if (countAttachments() > before) return how;
+      }
+    }
+    throw new Error('image-not-accepted');
   }
 
   function prefill(payload, timeoutMs = 6000) {
@@ -117,13 +169,11 @@
       (function attempt() {
         const el = findInput();
         if (el) {
-          try {
-            if (payload.kind === 'image') attachImage(el, payload); else fill(el, payload);
+          Promise.resolve().then(() => payload.kind === 'image' ? attachImage(el, payload) : fill(el, payload)).then(() => {
             // Re-assert focus shortly after (the page may re-render the box; the panel may take focus late).
             [60, 250, 600].forEach((t) => setTimeout(() => { const e2 = findInput() || el; if (document.activeElement !== e2) placeCaretAtEnd(e2); }, t));
             resolve({ ok: true });
-          }
-          catch (e) { resolve({ ok: false, reason: 'fill-error: ' + e.message }); }
+          }, (e) => resolve({ ok: false, reason: e && e.message === 'image-not-accepted' ? 'image-not-accepted' : 'fill-error: ' + (e && e.message) }));
         } else if (Date.now() - start > timeoutMs) {
           resolve({ ok: false, reason: 'input-not-found' });
         } else setTimeout(attempt, 250);

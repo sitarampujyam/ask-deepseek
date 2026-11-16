@@ -1,4 +1,4 @@
-// Content script (all pages). Floating "Ask DeepSeek" liquid-glass button. Lives on every page,
+// Content script (all pages). Floating "Ask LLM" liquid-glass button. Lives on every page,
 // in a shadow root so page styles can't touch it.
 
 function isEditable(el) {
@@ -261,7 +261,7 @@ function createAskButton({ getSource, send }) {
         send: async (payload) => {
           // Must start inside the click for Chrome to allow opening the panel.
           const opening = IS_READER && !panelOpen && windowId !== null
-            ? chrome.sidePanel.open({ windowId }).then(() => true, (e) => { console.warn('[Ask DeepSeek] sidePanel.open failed:', e && e.message); return false; }) : null;
+            ? chrome.sidePanel.open({ windowId }).then(() => true, (e) => { console.warn('[Ask LLM] sidePanel.open failed:', e && e.message); return false; }) : null;
           const res = await chrome.runtime.sendMessage({ type: 'ask-selection', payload, queueIfClosed: IS_READER && !panelOpen });
           // If open() was refused but the panel was already up, the text was delivered directly: that's fine.
           if (opening && !(await opening) && (!res || res.queued || !res.ok)) return { ok: false, reason: 'could-not-open' };

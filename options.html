@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Ask DeepSeek options</title>
+  <title>Ask LLM options</title>
   <style>
     :root { color-scheme: light dark; }
     body { font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; max-width: 560px; margin: 40px auto; padding: 0 20px; }
@@ -15,11 +15,11 @@
   </style>
 </head>
 <body>
-  <h1>Ask DeepSeek</h1>
+  <h1>Ask LLM</h1>
   <label>
     <input type="checkbox" id="intercept">
-    <span>Open PDF links in the Ask DeepSeek reader
-      <small>When off, PDFs open in Chrome’s built-in viewer. The context-menu entry “Open in Ask DeepSeek reader” still works.</small>
+    <span>Open PDF links in the Ask LLM reader
+      <small>When off, PDFs open in Chrome’s built-in viewer. The context-menu entry “Open in Ask LLM reader” still works.</small>
     </span>
   </label>
   <label style="margin-top:18px">
@@ -31,7 +31,7 @@
   <label style="margin-top:18px">
     <input type="checkbox" id="indeepseek">
     <span>Show the Ask button when I select text in the chat's replies
-      <small>Works in both DeepSeek and Claude. Lets you ask a follow-up about part of an answer. The text goes into the same message box, introduced as coming from the earlier response.</small>
+      <small>Works in DeepSeek, Claude, ChatGPT and Gemini. Lets you ask a follow-up about part of an answer. The text goes into the same message box, introduced as coming from the earlier response.</small>
     </span>
   </label>
   <p><button id="forget">Forget all saved positions</button> <span id="forgot" style="opacity:.75"></span></p>

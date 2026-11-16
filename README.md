@@ -34,7 +34,7 @@ Not affiliated with DeepSeek, Anthropic, OpenAI or Google. It just embeds their 
 You don't need the Chrome Web Store or any coding. It takes about a minute.
 
 1. **Get the files.** On this page click the green **Code** button, then **Download ZIP**. Unzip it somewhere you won't
-   delete it later (the extension runs from that folder). If you use git: `git clone https://github.com/sitarampujyam/ask-deepseek.git`
+   delete it later (the extension runs from that folder). If you use git: `git clone https://github.com/sitarampujyam/ask-llm.git`
 2. In Chrome, open `chrome://extensions` (paste it in the address bar).
 3. Turn on **Developer mode** (switch at the top right).
 4. Click **Load unpacked** and pick the folder that contains `manifest.json`.

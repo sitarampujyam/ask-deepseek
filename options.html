@@ -11,7 +11,18 @@
   <div id="ambient" aria-hidden="true"></div>
   <main>
     <header class="head">
-      <img src="icons/icon128.png" alt="" width="52" height="52">
+      <svg class="logo" viewBox="13 13 102 102" width="52" height="52" aria-hidden="true">
+        <defs>
+          <path id="lb" d="M38 16H90C103.300 16 112 24.700 112 38V74C112 87.300 103.300 96 90 96H52L32.500 111.200C29.900 113.200 26.200 111.300 26.300 108L26.700 95.500C20 91.800 16 84.500 16 74V38C16 24.700 24.700 16 38 16Z"/>
+          <clipPath id="lc"><use href="#lb"/></clipPath>
+          <linearGradient id="lg" x1="0" y1="0" x2=".35" y2="1"><stop offset="0" class="s1"/><stop offset="1" class="s2"/></linearGradient>
+          <linearGradient id="ls" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+          <linearGradient id="lr" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".9"/><stop offset=".5" stop-color="#fff" stop-opacity=".12"/><stop offset="1" stop-color="#fff" stop-opacity=".45"/></linearGradient>
+        </defs>
+        <use href="#lb" fill="url(#lg)"/>
+        <g clip-path="url(#lc)"><rect x="10" y="10" width="108" height="40" rx="20" fill="url(#ls)"/></g>
+        <use href="#lb" fill="none" stroke="url(#lr)" stroke-width="2"/>
+      </svg>
       <div>
         <h1>Ask LLM</h1>
         <p class="sub">Settings are saved as you change them.</p>

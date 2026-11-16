@@ -53,6 +53,15 @@ function installMenu() {
 chrome.runtime.onInstalled.addListener(() => { installRules().catch(console.error); installMenu(); });
 
 chrome.storage.local.get({ interceptPdfs: true }).then(v => { interceptPdfs = v.interceptPdfs; });
+
+// Toolbar icon takes the reader's colour theme (icons/tint/<colour>-16/32.png).
+const TINTS = ['violet', 'magenta', 'rose', 'amber', 'emerald', 'teal', 'ocean'];
+function tintIcon(id) {
+  const t = TINTS.includes(id) ? id : 'violet';
+  chrome.action.setIcon({ path: { 16: `icons/tint/${t}-16.png`, 32: `icons/tint/${t}-32.png` } }).catch(() => {});
+}
+chrome.storage.local.get({ hue: 'violet' }).then(v => tintIcon(v.hue));
+chrome.storage.onChanged.addListener((ch, area) => { if (area === 'local' && ch.hue) tintIcon(ch.hue.newValue); });
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === 'local' && changes.interceptPdfs) interceptPdfs = changes.interceptPdfs.newValue !== false;
 });

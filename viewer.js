@@ -595,6 +595,7 @@ HUES.forEach((h) => {
 });
 function applyHue() {
   const h = HUES.find(x => x.id === hue) || HUES[0];
+  try { chrome.storage.local.set({ hue: h.id }); } catch {}   // the toolbar icon takes this tint
   document.documentElement.style.setProperty('--hs', h.hs + 'deg');
   huesEl.querySelectorAll('.hue').forEach(b => b.setAttribute('aria-checked', String(b.dataset.hue === h.id)));
 }

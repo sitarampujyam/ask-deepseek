@@ -11,7 +11,7 @@
 - Select part of a DeepSeek reply and the Ask button lets you ask a follow-up about just that bit. Always on. (Claude, ChatGPT and Gemini have their own button for this.)
 
 **Better UI**
-- New icon: a 3D liquid-glass chat bubble with no background.
+- New icon: a minimal rounded-square glass chat bubble with no background. The toolbar icon and the options page take the reader's colour theme.
 - The side panel's top bar is a floating liquid-glass pill that sits on the chat's own background colour and turns light or dark to match it.
 - Reload button in the panel, for a stuck sign-in or bot check.
 - Redesigned options page: glass cards and toggle switches, following the reader's theme and colour.

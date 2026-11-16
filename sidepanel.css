@@ -6,14 +6,22 @@ body { display: flex; flex-direction: column; }
 #frame { display:block; width:100%; flex: 1 1 auto; min-height: 0; border:0; }
 .strip { flex: none; display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-bottom: 1px solid var(--line);
   background: linear-gradient(180deg, color-mix(in srgb, var(--card) 92%, #8a7bff), var(--card)); }
-.chip { display: inline-flex; align-items: center; gap: 7px; height: 30px; padding: 0 14px 0 11px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer;
+.chip { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 11px 0 9px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer;
   color: var(--fg); border: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 70%, transparent);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.22); transition: transform .2s cubic-bezier(.34,1.4,.64,1), background .15s; }
 .chip svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
 .chip:hover:not(:disabled) { transform: scale(1.04); background: var(--bg); }
 .chip:active:not(:disabled) { transform: scale(.96); }
 .chip:disabled { opacity: .45; cursor: default; }
-.hint { font-size: 12px; opacity: .7; margin-left: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hint { font-size: 12px; opacity: .7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-basis: 100%; }
+.hint:empty { display: none; }
+.strip { flex-wrap: wrap; }
+.pseg { display: inline-flex; padding: 2px; border-radius: 999px; border: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 60%, transparent); margin-left: auto; order: 2; }
+.pseg button { padding: 0 10px; height: 26px; border: 0; border-radius: 999px; background: transparent; font-size: 12.5px; font-weight: 600; opacity: .7; transition: background .15s, opacity .15s; }
+.pseg button:hover { opacity: 1; }
+.pseg button[aria-checked="true"] { background: var(--accent); color: #fff; opacity: 1; }
+@media (prefers-color-scheme: dark) { .pseg button[aria-checked="true"] { color: #0b1020; } }
+.hint { order: 3; }
 body.popup-mode .strip { display: none; }
 .notice { position:fixed; left:12px; right:12px; bottom:12px; padding:14px; border:1px solid var(--line); border-radius:14px; background:var(--card); box-shadow:0 8px 28px rgba(0,0,0,.25); }
 .notice[hidden], .toast[hidden] { display:none; }
@@ -26,3 +34,6 @@ button:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
 .toast { position:fixed; left:50%; top:56px; transform:translateX(-50%); padding:8px 14px; border-radius:999px; background:#1d2230; color:#fff; font-size:13px; box-shadow:0 4px 16px rgba(0,0,0,.3); }
 body.popup-mode #frame { display:none; }
 body.popup-mode .notice { top:12px; bottom:auto; }
+
+/* narrow panel: icon-only chips so the DeepSeek/Claude switch stays on the same row */
+@media (max-width: 470px) { .chip { padding: 0; width: 34px; justify-content: center; } .chip .lbl { display: none; } }

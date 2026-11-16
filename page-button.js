@@ -5,6 +5,7 @@ function isEditable(el) {
   return !!el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName));
 }
 
+let ASK_NAME = 'DeepSeek';   // which chat the button talks to; follows the side panel's choice
 const MAX_CHARS = 6000;
 const SETTLE_MS = 120;
 const FILTER_ID = 'ask-deepseek-refract';
@@ -86,7 +87,7 @@ function createAskButton({ getSource, send }) {
   shadow.innerHTML = `<style>${STYLE}</style>
     <button class="btn" type="button" aria-live="polite">
       <span class="sheen"></span>
-      <span class="content">${ICON_MAIN}${ICON_CHECK}<span class="label">Ask DeepSeek</span></span>
+      <span class="content">${ICON_MAIN}${ICON_CHECK}<span class="label">Ask ${ASK_NAME}</span></span>
     </button>`;
   const btn = shadow.querySelector('.btn');
   const label = shadow.querySelector('.label');
@@ -117,7 +118,7 @@ function createAskButton({ getSource, send }) {
 
   function resetLabel() {
     btn.classList.remove('done', 'err');
-    label.textContent = 'Ask DeepSeek';
+    label.textContent = 'Ask ' + ASK_NAME;
   }
 
   function hide() {
@@ -219,6 +220,7 @@ function createAskButton({ getSource, send }) {
   });
 
   return {
+    refreshLabel() { if (!busy && !btn.classList.contains('done') && !btn.classList.contains('err')) resetLabel(); },
     setEnabled(v) { enabled = !!v; if (!enabled) { busy = false; hide(); } else schedule(); },
     hide
   };
@@ -232,7 +234,17 @@ function createAskButton({ getSource, send }) {
   // In the PDF reader the button is always available and opens the side panel itself;
   // on ordinary pages it only exists while the side panel is already open.
   const IS_READER = location.protocol === 'chrome-extension:' && location.pathname.endsWith('/viewer.html');
-  const ON_DEEPSEEK = location.hostname === 'chat.deepseek.com';
+  const HOST_PROVIDER = Object.values(ASK_PROVIDERS).find(p => new URL(p.origin).hostname === location.hostname);
+  const ON_DEEPSEEK = !!HOST_PROVIDER;   // inside a chat site itself (DeepSeek or Claude)
+  const setName = (id) => {
+    const p = ASK_PROVIDERS[id];
+    if (p) { ASK_NAME = p.name; if (btn) btn.refreshLabel(); }
+  };
+  if (HOST_PROVIDER) ASK_NAME = HOST_PROVIDER.name;
+  else {
+    chrome.storage.local.get({ provider: ASK_DEFAULT_PROVIDER }).then(v => setName(v.provider)).catch(() => {});
+    chrome.storage.onChanged.addListener((ch, area) => { if (area === 'local' && ch.provider) setName(ch.provider.newValue); });
+  }
   let btn = null;
   let panelOpen = false;
   let windowId = null;
@@ -260,7 +272,7 @@ function createAskButton({ getSource, send }) {
     if (btn) btn.setEnabled(enabled);
   }
 
-  // Inside DeepSeek itself (the side panel frame or the popup): the button is for selecting text in DeepSeek's
+  // Inside a chat site itself (the side panel frame or the popup): the button is for selecting text in its
   // replies. It fills this same frame's message box directly, no background round trip. Controlled by an option.
   if (ON_DEEPSEEK) {
     let on = true;

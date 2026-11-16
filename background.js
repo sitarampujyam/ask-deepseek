@@ -2,7 +2,12 @@
 // Responsibilities: side-panel behaviour, header-stripping rule, PDF interception,
 // context menu, open/closed tracking of the side panel, routing selections.
 
-const DEEPSEEK_URL = 'https://chat.deepseek.com/';
+importScripts('providers.js');
+
+async function providerUrl() {
+  const { provider } = await chrome.storage.local.get({ provider: ASK_DEFAULT_PROVIDER });
+  return (ASK_PROVIDERS[provider] || ASK_PROVIDERS[ASK_DEFAULT_PROVIDER]).url;
+}
 const MAX_CHARS = 6000;
 
 const panels = new Map();       // windowId -> { port }
@@ -15,8 +20,8 @@ let interceptPdfs = true;
 
 chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(console.error);
 
-// DNR can only remove a response header, not edit part of it, so for the DeepSeek
-// frame loaded by THIS extension we drop X-Frame-Options and the whole CSP header.
+// DNR can only remove a response header, not edit part of it, so for the chat frames
+// (DeepSeek, Claude) loaded by THIS extension we drop X-Frame-Options and the whole CSP header.
 async function installRules() {
   await chrome.declarativeNetRequest.updateDynamicRules({
     removeRuleIds: [1],
@@ -31,7 +36,7 @@ async function installRules() {
         ]
       },
       condition: {
-        requestDomains: ['chat.deepseek.com'],
+        requestDomains: Object.values(ASK_PROVIDERS).map(p => new URL(p.origin).hostname),
         resourceTypes: ['sub_frame'],
         initiatorDomains: [chrome.runtime.id]
       }
@@ -173,11 +178,12 @@ async function openPopup(mainWindowId) {
     return { ok: true };
   }
   const main = await chrome.windows.get(mainWindowId);
+  const startUrl = await providerUrl();
   const width = 440;
   let win;
   try {
     win = await chrome.windows.create({
-      url: DEEPSEEK_URL,
+      url: startUrl,
       type: 'popup',
       width,
       height: main.height,
@@ -187,9 +193,9 @@ async function openPopup(mainWindowId) {
   } catch {
     // Bounds rejected (e.g. off-screen on a small/odd display): let Chrome place it.
     try {
-      win = await chrome.windows.create({ url: DEEPSEEK_URL, type: 'popup', width, height: 700 });
+      win = await chrome.windows.create({ url: startUrl, type: 'popup', width, height: 700 });
     } catch {
-      win = await chrome.windows.create({ url: DEEPSEEK_URL, type: 'popup' });
+      win = await chrome.windows.create({ url: startUrl, type: 'popup' });
     }
   }
   popups.set(mainWindowId, { tabId: win.tabs[0].id, windowId: win.id, queue: [] });

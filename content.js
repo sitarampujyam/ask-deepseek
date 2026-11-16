@@ -34,6 +34,14 @@
     'Write in simple, lucid language. No introduction or closing remarks, no filler or AI-sounding phrasing. ' +
     'Get straight to the point, be accurate, and explain it well.\n\n';
 
+  // Claude gets a short intro with no style instructions; DeepSeek keeps the longer one above.
+  const ON_CLAUDE = location.hostname === 'claude.ai';
+  const CLAUDE_HEADERS = {
+    selection: 'The user selected the following text. If the user asks a question, answer it. If not, explain the selected text.\n\n',
+    response: 'The user selected the following text from your previous response. If the user asks a question, answer it. If not, explain the selected text.\n\n',
+    page: 'The user wants a summary of the web page below. The page text was copied from the page and a screenshot of it follows. If the user adds a question, answer it instead of summarising.\n\n'
+  };
+
   function readValue(el) {
     return el instanceof HTMLTextAreaElement || el instanceof HTMLInputElement ? el.value : (el.innerText || '');
   }
@@ -66,7 +74,8 @@
     const empty = existing.trim() === '';
     const isPage = payload.kind === 'page';
     const block = isPage ? `Page: ${payload.title}\nURL: ${payload.url}\n"""\n${payload.text}\n"""\n\n` : buildBlock(payload);
-    const header = isPage ? PAGE_HEADER : payload.kind === 'response' ? RESPONSE_HEADER : HEADER;
+    const kind = isPage ? 'page' : payload.kind === 'response' ? 'response' : 'selection';
+    const header = ON_CLAUDE ? CLAUDE_HEADERS[kind] : { page: PAGE_HEADER, response: RESPONSE_HEADER, selection: HEADER }[kind];
     const isTextControl = el instanceof HTMLTextAreaElement || el instanceof HTMLInputElement;
 
     if (isTextControl) {

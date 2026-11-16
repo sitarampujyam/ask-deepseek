@@ -666,8 +666,8 @@ $('btnSnap').addEventListener('click', async () => {
   if (!blob) { toast('Nothing to capture yet'); return; }
   const res = await chrome.runtime.sendMessage({ type: 'ask-selection', queueIfClosed: !panelOpen,
     payload: { kind: 'image', dataUrl: await blobToDataUrl(blob), title: sourceTitle, page: String(currentPage()) } }).catch(() => null);
-  if (opening && !(await opening)) return toast('Open the DeepSeek panel first');
-  toast(res && res.ok ? 'Snapshot added to DeepSeek' : 'Could not add the snapshot');
+  if (opening && !(await opening)) return toast('Open the side panel first');
+  toast(res && res.ok ? 'Snapshot added' : 'Could not add the snapshot');
 });
 
 /* ---------- menu ---------- */

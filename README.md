@@ -8,7 +8,7 @@
 
 ![Selecting text in the reader and sending it to DeepSeek in the side panel](docs/side-panel.png)
 
-A Chrome extension that puts DeepSeek in your side panel and makes it easy to ask about whatever you're reading.
+A Chrome extension that puts DeepSeek (or Claude, your pick) in your side panel and makes it easy to ask about whatever you're reading.
 
 Select some text on any page, click the small **Ask DeepSeek** button that pops up, and the text lands in DeepSeek's
 message box. You write your question and press send yourself. The extension never sends anything for you.
@@ -52,7 +52,8 @@ To update later, replace the folder with the new download and press the reload a
 - Fills DeepSeek's message box and puts the cursor at the end. Never presses send.
 - Adds a source line with the page title, the PDF page number and the link. A second selection is appended below the first.
 - Starts the box with a short instruction telling DeepSeek to explain the text plainly. Add your own question and it follows that instead.
-- Works inside DeepSeek too: select part of one of its replies and the same button appears. The text goes into the message box introduced as coming from the earlier response, so you can ask a follow-up about just that bit. Can be turned off in Options.
+- DeepSeek or Claude: a switch at the top of the side panel picks which site you chat with. DeepSeek is the default, and the panel remembers your last choice. Claude is just claude.ai in the panel, so sign in to it once like DeepSeek. For Claude, the text is introduced with a short note (answer the question if there is one, otherwise explain the text) instead of DeepSeek's longer style instructions.
+- Works inside the chat site too: select part of one of its replies and the same button appears. The text goes into the message box introduced as coming from the earlier response, so you can ask a follow-up about just that bit. Can be turned off in Options.
 - Snapshot of the visible part of a page or PDF, pasted as an image. Held in memory only, never saved to disk.
 - Summarise button for web pages: page text plus a screenshot.
 - Declines DeepSeek's cookie banner for you (necessary cookies only), since it can't remember the choice inside a panel.
@@ -109,7 +110,7 @@ Reading position and settings are stored in your browser. Options has a switch t
 |---|---|
 | Access to all sites | To show the Ask DeepSeek button on whatever page you're on, and to read PDFs from any link. |
 | `sidePanel` | The DeepSeek side panel. |
-| `declarativeNetRequest` | DeepSeek normally refuses to be embedded in other pages. A rule removes the `X-Frame-Options` and `Content-Security-Policy` headers, only on DeepSeek's own frame inside this extension's panel. It touches nothing else. |
+| `declarativeNetRequest` | DeepSeek and Claude normally refuse to be embedded in other pages. A rule removes the `X-Frame-Options` and `Content-Security-Policy` headers, only on their frames inside this extension's panel. It touches nothing else. |
 | `storage` | Your settings. |
 | `contextMenus` | The right-click "Open in Ask DeepSeek reader" entry. |
 | `webNavigation`, `scripting` | Catching `.pdf` links and tracking the panel's open state. |
@@ -119,12 +120,12 @@ Reading position and settings are stored in your browser. Options has a switch t
 Open the extension's options page (right-click the icon, then Options):
 - Open PDF links in the reader (on by default). Turn it off to use Chrome's viewer again.
 - Remember where I stopped in each PDF.
-- Show the Ask button when selecting text in DeepSeek's replies (on by default).
+- Show the Ask button when selecting text in the chat's replies, in DeepSeek or Claude (on by default).
 - Forget all saved positions.
 
-## If DeepSeek changes its website
+## If DeepSeek or Claude changes its website
 
-The button fills the message box by looking for it on the page. If DeepSeek redesigns and filling stops working, the
+The button fills the message box by looking for it on the page. If DeepSeek or Claude redesigns and filling stops working, the
 selectors live in `selectors.js`, in one place, and are easy to update.
 
 ## Limits
@@ -142,8 +143,9 @@ selectors live in `selectors.js`, in one place, and are easy to update.
 | `sidepanel.html`, `sidepanel.js`, `sidepanel.css` | The side panel with DeepSeek and the Snapshot/Summarise strip |
 | `background.js` | Header rule, PDF interception, shortcut, message routing |
 | `page-button.js` | The floating button on pages and in the reader |
-| `content.js` | Runs inside DeepSeek, fills the message box |
-| `selectors.js` | Everything that depends on DeepSeek's page layout |
+| `content.js` | Runs inside DeepSeek and Claude, fills the message box |
+| `selectors.js` | Everything that depends on the chat sites' page layout |
+| `providers.js` | The list of chat sites (DeepSeek, Claude) |
 | `options.html`, `options.js` | Settings |
 | `lib/` | PDF.js 4.10.38 (Apache-2.0), bundled so nothing is downloaded |
 

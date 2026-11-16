@@ -1,8 +1,8 @@
-// Side panel: hosts the DeepSeek iframe, reports "I'm open" to the background via a port,
+// Side panel: hosts the chat iframe (DeepSeek or Claude), reports "I'm open" to the background via a port,
 // and relays selections into the iframe (or shows the popup fallback).
 
-const DEEPSEEK_ORIGIN = 'https://chat.deepseek.com';
-const DEEPSEEK_URL = DEEPSEEK_ORIGIN + '/';
+let provider = ASK_PROVIDERS[ASK_DEFAULT_PROVIDER];   // which chat site is showing; remembered in storage
+const pname = () => provider.name;
 const READY_TIMEOUT_MS = 8000;
 
 const frame = document.getElementById('frame');
@@ -47,10 +47,10 @@ function openPopup() { chrome.runtime.sendMessage({ type: 'open-popup', windowId
 
 function showFallbackNotice() {
   showNotice(
-    'DeepSeek did not load inside the panel (embedding or sign-in may be blocked). ' +
+    pname() + ' did not load inside the panel (embedding or sign-in may be blocked). ' +
     'You can use it in a docked popup window instead. Selections will be delivered there.',
     [
-      button('Open DeepSeek in a popup window', openPopup, true),
+      button('Open ' + pname() + ' in a popup window', openPopup, true),
       button('Keep waiting', () => { hideNotice(); armReadyTimer(); }),
       button('Reload panel', () => { hideNotice(); loadFrame(); })
     ]
@@ -60,7 +60,7 @@ function showFallbackNotice() {
 function renderPopupState() {
   document.body.classList.toggle('popup-mode', popupOpen);
   if (popupOpen) {
-    showNotice('DeepSeek is open in a popup window. Highlighted text is delivered there.', [
+    showNotice(pname() + ' is open in a popup window. Highlighted text is delivered there.', [
       button('Focus popup', () => chrome.runtime.sendMessage({ type: 'focus-popup', windowId }), true),
       button('Close popup & use panel', () => chrome.runtime.sendMessage({ type: 'close-popup', windowId }))
     ]);
@@ -79,12 +79,38 @@ function armReadyTimer() {
 
 function loadFrame() {
   ready = false;
-  frame.src = DEEPSEEK_URL;
+  frame.src = provider.url;
+  frame.title = provider.name + ' chat';
   armReadyTimer();
 }
 
+/* ---------- DeepSeek / Claude switch ---------- */
+
+const pseg = document.getElementById('providerSeg');
+function paintProvider() {
+  pseg.querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', String(b.dataset.p === provider.id)));
+  btnSnap.title = 'Add a snapshot of the current tab to ' + pname();
+  btnSummarise.title = "Paste this page's text plus a snapshot and ask " + pname() + ' to summarise it';
+}
+pseg.addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (!b || b.dataset.p === provider.id) return;
+  provider = ASK_PROVIDERS[b.dataset.p];
+  chrome.storage.local.set({ provider: provider.id });
+  hideNotice();
+  paintProvider();
+  loadFrame();
+});
+pseg.addEventListener('keydown', (e) => {
+  if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+  e.preventDefault();
+  const ids = Object.keys(ASK_PROVIDERS), n = ids.indexOf(provider.id) + (e.key === 'ArrowRight' ? 1 : -1);
+  const next = pseg.querySelector(`[data-p="${ids[(n + ids.length) % ids.length]}"]`);
+  next.click(); next.focus();
+});
+
 window.addEventListener('message', (event) => {
-  if (event.origin !== DEEPSEEK_ORIGIN || event.source !== frame.contentWindow) return;
+  if (event.origin !== provider.origin || event.source !== frame.contentWindow) return;
   const d = event.data;
   if (!d || typeof d.type !== 'string') return;
   if (d.type === 'ask-deepseek-ready') {
@@ -96,14 +122,14 @@ window.addEventListener('message', (event) => {
     try { window.focus(); frame.focus(); } catch {}
   } else if (d.type === 'ask-deepseek-result' && d.ok === false) {
     showToast(d.reason === 'input-not-found'
-      ? "Couldn't find DeepSeek's message box (signed in? see selectors.js)."
-      : 'Could not add text to DeepSeek.');
+      ? "Couldn't find " + pname() + "'s message box (signed in? see selectors.js)."
+      : 'Could not add text to ' + pname() + '.');
   }
 });
 
 function post(payload) {
-  try { window.focus(); frame.focus(); } catch {}   // hand keyboard focus to the DeepSeek frame so you can type at once
-  frame.contentWindow.postMessage({ type: 'ask-deepseek-prefill', payload }, DEEPSEEK_ORIGIN);
+  try { window.focus(); frame.focus(); } catch {}   // hand keyboard focus to the chat frame so you can type at once
+  frame.contentWindow.postMessage({ type: 'ask-deepseek-prefill', payload }, provider.origin);
 }
 function flush() { while (ready && queue.length) post(queue.shift()); }
 
@@ -138,7 +164,7 @@ btnSnap.addEventListener('click', async () => {
   try {
     const dataUrl = await chrome.tabs.captureVisibleTab(windowId, { format: 'png' });   // in memory only, never saved
     deliver({ kind: 'image', dataUrl, title: (t && t.title) || '', page: '' });
-    showToast('Snapshot added to DeepSeek');
+    showToast('Snapshot added to ' + pname());
   } catch { showToast("Can't capture this page"); }
 });
 
@@ -157,7 +183,7 @@ btnSummarise.addEventListener('click', async () => {
   try { dataUrl = await chrome.tabs.captureVisibleTab(windowId, { format: 'png' }); } catch {}   // snapshot of the page right now
   deliver({ kind: 'page', title: t.title || t.url, url: t.url.split('#')[0], text });           // text first, then the image
   if (dataUrl) deliver({ kind: 'image', dataUrl, title: t.title || '', page: '' });
-  showToast(dataUrl ? 'Page text and snapshot added to DeepSeek' : 'Page text added (snapshot unavailable)');
+  showToast(dataUrl ? 'Page text and snapshot added to ' + pname() : 'Page text added (snapshot unavailable)');
 });
 
 /* ---------- background port ---------- */
@@ -181,6 +207,9 @@ setInterval(() => { try { port && port.postMessage({ type: 'ping' }); } catch {}
 
 (async function init() {
   windowId = (await chrome.windows.getCurrent()).id;
+  const saved = await chrome.storage.local.get({ provider: ASK_DEFAULT_PROVIDER });
+  provider = ASK_PROVIDERS[saved.provider] || ASK_PROVIDERS[ASK_DEFAULT_PROVIDER];
+  paintProvider();
   connect();
   loadFrame();
   refreshStrip();

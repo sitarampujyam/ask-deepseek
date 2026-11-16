@@ -16,6 +16,11 @@ You write your question and press send yourself. The extension never sends anyth
 
 It also comes with its own PDF reader, because Chrome's built-in one can't talk to extensions.
 
+## What's new in 2.0
+
+New chats (Claude, ChatGPT and Gemini next to DeepSeek), a liquid-glass side panel and options page, and fixes for
+snapshots in Claude and cookie banners. The full list is in [CHANGELOG.md](CHANGELOG.md).
+
 ## How it works, and what it costs you
 
 There's no API key and no server in between. The side panel simply shows the chat website itself (chat.deepseek.com,
@@ -60,6 +65,8 @@ To update later, replace the folder with the new download and press the reload a
 - **Snapshot:** click the camera in the reader's toolbar, or the camera at the top of the side panel, to attach a picture of what's on screen.
 - **Summarise:** the Summarise button in the side panel pastes the active tab's text and a screenshot, with a short instruction to summarise it.
 - **Reload:** the round arrow at the top of the panel reloads the chat, which clears a stuck sign-in or a bot check.
+- **Claude chats:** Claude hides its chat list when the panel is narrow, so with Claude picked there's a Chats button
+  (three lines) in the bar. It opens your Claude chats in the panel; click one to continue it.
 
 ## Features
 
@@ -72,8 +79,7 @@ To update later, replace the folder with the new download and press the reload a
   For Claude the intro is shorter still: answer the question if there is one, otherwise explain the text.
 - Works inside DeepSeek too: select part of one of its replies and the same button appears (Claude, ChatGPT and Gemini
   already have their own button for this, so it's DeepSeek only). The text goes into the
-  message box introduced as coming from the earlier response, so you can ask a follow-up about just that bit. Can be
-  turned off in Options.
+  message box introduced as coming from the earlier response, so you can ask a follow-up about just that bit.
 - Snapshot of the visible part of a page or PDF, attached as an image. Each site takes images differently (paste, the
   attach button, drag and drop), so it tries those in turn and stops at the first one that works. If a site still refuses,
   the image goes on your clipboard and the panel tells you to press ⌘V. It's held in memory only, never saved to disk.
@@ -143,7 +149,6 @@ Reading position and settings are stored in your browser. Options has a switch t
 Open the extension's options page (right-click the icon, then Options):
 - Open PDF links in the reader (on by default). Turn it off to use Chrome's viewer again.
 - Remember where I stopped in each PDF.
-- Show the Ask button when selecting text in DeepSeek's replies (on by default).
 - Forget all saved positions.
 
 ## If a chat site changes

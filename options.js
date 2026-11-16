@@ -13,12 +13,6 @@ remember.addEventListener('change', async () => {
   await chrome.storage.local.set({ rememberPosition: remember.checked });
   saved.classList.add('on'); setTimeout(() => saved.classList.remove('on'), 1200);
 });
-const inDs = document.getElementById('indeepseek');
-chrome.storage.local.get({ askInDeepSeek: true }).then(v => { inDs.checked = v.askInDeepSeek !== false; });
-inDs.addEventListener('change', async () => {
-  await chrome.storage.local.set({ askInDeepSeek: inDs.checked });
-  saved.classList.add('on'); setTimeout(() => saved.classList.remove('on'), 1200);
-});
 document.getElementById('forget').addEventListener('click', () => {
   try { localStorage.removeItem('askds.pos'); } catch {}
   document.getElementById('forgot').textContent = 'Done. All saved positions are cleared.';

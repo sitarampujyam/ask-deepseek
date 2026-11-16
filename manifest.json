@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Ask LLM",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Ask DeepSeek, Claude, ChatGPT or Gemini about anything you read: highlight text or snapshot a page into the chat in the side panel, plus a PDF reader with highlights and notes. Nothing is sent automatically.",
   "minimum_chrome_version": "114",
   "permissions": [

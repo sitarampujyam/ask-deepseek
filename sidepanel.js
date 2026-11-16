@@ -77,10 +77,10 @@ function armReadyTimer() {
   readyTimer = setTimeout(() => { if (!ready && !popupOpen) showFallbackNotice(); }, READY_TIMEOUT_MS);
 }
 
-function loadFrame() {
+function loadFrame(url) {
   ready = false;
   chatBg = null; applyLook();
-  frame.src = provider.url;
+  frame.src = url || provider.url;
   frame.title = provider.name + ' chat';
   armReadyTimer();
 }
@@ -104,6 +104,8 @@ function paintProvider() {
   btnSnap.title = 'Add a snapshot of the current tab to ' + pname();
   btnSummarise.title = "Paste this page's text plus a snapshot and ask " + pname() + ' to summarise it';
   btnReload.title = 'Reload ' + pname() + ' (fixes a stuck sign-in or bot check)';
+  btnChats.hidden = !provider.chatsUrl;
+  btnChats.title = 'Your ' + pname() + ' chats';
 }
 function setMenu(open) {
   pickMenu.hidden = !open; pickBtn.setAttribute('aria-expanded', String(open));
@@ -134,6 +136,9 @@ window.addEventListener('blur', () => { if (Date.now() - menuOpenedAt > 600) set
 
 const btnReload = document.getElementById('btnReload');
 btnReload.addEventListener('click', () => { hideNotice(); loadFrame(); });
+// Claude hides its chat list at panel width, so the Chats button opens its list page instead.
+const btnChats = document.getElementById('btnChats');
+btnChats.addEventListener('click', () => { if (provider.chatsUrl) { hideNotice(); loadFrame(provider.chatsUrl); } });
 
 /* ---------- look: follow the reader's theme and colour; sheen follows the pointer ---------- */
 

@@ -275,24 +275,15 @@ function createAskButton({ getSource, send }) {
   }
 
   // Inside a chat site itself (the side panel frame or the popup): the button is for selecting text in its
-  // replies. It fills this same frame's message box directly, no background round trip. Controlled by an option.
+  // replies. It fills this same frame's message box directly, no background round trip. Always on.
   if (ON_DEEPSEEK) {
-    let on = true;
-    const show = () => {
-      if (!btn) {
-        btn = createAskButton({
-          getSource: () => ({ title: 'your earlier response', url: '' }),
-          send: async (payload) => typeof globalThis.__askDeepSeekPrefill === 'function'
-            ? globalThis.__askDeepSeekPrefill({ kind: 'response', text: payload.text, title: payload.title })
-            : { ok: false }
-        });
-      }
-      btn.setEnabled(on);
-    };
-    chrome.storage.local.get({ askInDeepSeek: true }).then((v) => { on = v.askInDeepSeek !== false; show(); }).catch(show);
-    chrome.storage.onChanged.addListener((ch, area) => {
-      if (area === 'local' && ch.askInDeepSeek) { on = ch.askInDeepSeek.newValue !== false; show(); }
+    btn = createAskButton({
+      getSource: () => ({ title: 'your earlier response', url: '' }),
+      send: async (payload) => typeof globalThis.__askDeepSeekPrefill === 'function'
+        ? globalThis.__askDeepSeekPrefill({ kind: 'response', text: payload.text, title: payload.title })
+        : { ok: false }
     });
+    btn.setEnabled(true);
     return;
   }
 

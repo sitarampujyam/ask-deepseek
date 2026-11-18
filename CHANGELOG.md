@@ -20,6 +20,7 @@
 - The reader remembers the page, zoom and rotation you left each PDF at.
 
 **Bug fixes**
+- The Ask button now appears on Claude, ChatGPT, Gemini and DeepSeek when they're open in a normal tab, and sends to the side panel (a side chat about your chat with another AI). Before, it was missing there, and on the DeepSeek website it pasted into the page itself instead of the panel.
 - Snapshots now attach in Claude. Each site takes images differently, so the extension tries paste, the attach button and drag-and-drop in turn, and stops at the first one that works. If a site refuses all three, the image goes on your clipboard.
 - Cookie banners are rejected automatically on Claude as well as DeepSeek.
 - Clicking the Ask button on a page that was open before the extension was reloaded now says to reload the page, instead of a misleading "open the panel".

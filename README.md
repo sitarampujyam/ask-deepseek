@@ -77,7 +77,10 @@ To update later, replace the folder with the new download and press the reload a
 - Adds a source line with the page title, the PDF page number and the link. A second selection is appended below the first.
 - Starts the box with a short instruction to explain the text plainly. Add your own question and it follows that instead.
   For Claude the intro is shorter still: answer the question if there is one, otherwise explain the text.
-- Works inside DeepSeek too: select part of one of its replies and the same button appears (Claude, ChatGPT and Gemini
+- Works on the chat websites too. Open Claude, ChatGPT, Gemini or DeepSeek in a normal tab, select part of a
+  conversation, and the button sends it to the side panel, so you can have a side chat with DeepSeek about a chat
+  you're having with another AI.
+- Works inside the side panel's DeepSeek too: select part of one of its replies and the same button appears (Claude, ChatGPT and Gemini
   already have their own button for this, so it's DeepSeek only). The text goes into the
   message box introduced as coming from the earlier response, so you can ask a follow-up about just that bit.
 - Snapshot of the visible part of a page or PDF, attached as an image. Each site takes images differently (paste, the

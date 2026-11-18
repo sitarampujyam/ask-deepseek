@@ -249,6 +249,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     sendResponse({ ok: true });
     return;
   }
+  if (msg.type === 'is-chat-popup') {          // a chat site asking whether it is our docked popup window
+    sendResponse({ popup: !!sender.tab && [...popups.values()].some(p => p.tabId === sender.tab.id) });
+    return;
+  }
   if (msg.type === 'cs-ready' && sender.tab) {
     for (const p of popups.values()) {
       if (p.tabId === sender.tab.id && p.queue.length) {

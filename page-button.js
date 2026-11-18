@@ -228,28 +228,50 @@ function createAskButton({ getSource, send }) {
 
 /* ---------- bootstrap ---------- */
 
-(function () {
+(async function () {
   if (globalThis.__askDeepSeekPage) return;
   globalThis.__askDeepSeekPage = true;
   // In the PDF reader the button is always available and opens the side panel itself;
   // on ordinary pages it only exists while the side panel is already open.
   const IS_READER = location.protocol === 'chrome-extension:' && location.pathname.endsWith('/viewer.html');
   const HOST_PROVIDER = Object.values(ASK_PROVIDERS).find(p => new URL(p.origin).hostname === location.hostname);
-  const ON_DEEPSEEK = !!HOST_PROVIDER;   // inside a chat site itself (DeepSeek or Claude)
+
+  // A chat site is "embedded" when it is the chat itself: inside our side panel, or in our popup window.
+  // Opened as an ordinary tab, it is just another page, and the button sends to the side panel as usual
+  // (so you can ask DeepSeek in the panel about a Claude or ChatGPT conversation, or about DeepSeek itself).
+  let embedded = false;
+  if (HOST_PROVIDER) {
+    const extOrigin = new URL(chrome.runtime.getURL('/')).origin;
+    embedded = Array.from(location.ancestorOrigins || []).includes(extOrigin);
+    if (!embedded && window.top === window) {
+      embedded = await chrome.runtime.sendMessage({ type: 'is-chat-popup' }).then(r => !!(r && r.popup)).catch(() => false);
+    }
+  }
+
+  // Embedded: the button is for selecting text in the chat's own replies and fills this same message box.
+  // Claude, ChatGPT and Gemini have their own button for that, so ours only runs inside DeepSeek. Always on.
+  if (embedded) {
+    if (!HOST_PROVIDER.replyButton) return;
+    ASK_NAME = HOST_PROVIDER.name;
+    const own = createAskButton({
+      getSource: () => ({ title: 'your earlier response', url: '' }),
+      send: async (payload) => typeof globalThis.__askDeepSeekPrefill === 'function'
+        ? globalThis.__askDeepSeekPrefill({ kind: 'response', text: payload.text, title: payload.title })
+        : { ok: false }
+    });
+    own.setEnabled(true);
+    return;
+  }
+
+  let btn = null;
+  let panelOpen = false;
+  let windowId = null;
   const setName = (id) => {
     const p = ASK_PROVIDERS[id];
     if (p) { ASK_NAME = p.name; if (btn) btn.refreshLabel(); }
   };
-  // Claude, ChatGPT and Gemini have their own button for selected reply text, so ours only runs inside DeepSeek.
-  if (HOST_PROVIDER && !HOST_PROVIDER.replyButton) return;
-  if (HOST_PROVIDER) ASK_NAME = HOST_PROVIDER.name;
-  else {
-    chrome.storage.local.get({ provider: ASK_DEFAULT_PROVIDER }).then(v => setName(v.provider)).catch(() => {});
-    chrome.storage.onChanged.addListener((ch, area) => { if (area === 'local' && ch.provider) setName(ch.provider.newValue); });
-  }
-  let btn = null;
-  let panelOpen = false;
-  let windowId = null;
+  chrome.storage.local.get({ provider: ASK_DEFAULT_PROVIDER }).then(v => setName(v.provider)).catch(() => {});
+  chrome.storage.onChanged.addListener((ch, area) => { if (area === 'local' && ch.provider) setName(ch.provider.newValue); });
   if (IS_READER) chrome.windows.getCurrent().then(w => { windowId = w.id; }).catch(() => {});
 
   function apply(v) {
@@ -272,19 +294,6 @@ function createAskButton({ getSource, send }) {
       });
     }
     if (btn) btn.setEnabled(enabled);
-  }
-
-  // Inside a chat site itself (the side panel frame or the popup): the button is for selecting text in its
-  // replies. It fills this same frame's message box directly, no background round trip. Always on.
-  if (ON_DEEPSEEK) {
-    btn = createAskButton({
-      getSource: () => ({ title: 'your earlier response', url: '' }),
-      send: async (payload) => typeof globalThis.__askDeepSeekPrefill === 'function'
-        ? globalThis.__askDeepSeekPrefill({ kind: 'response', text: payload.text, title: payload.title })
-        : { ok: false }
-    });
-    btn.setEnabled(true);
-    return;
   }
 
   // The panel-state push (and re-query) decides visibility on ordinary pages.
